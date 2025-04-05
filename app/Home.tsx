@@ -1,106 +1,235 @@
-import { FlatList, ImageBackground, ScrollView, StyleSheet, Text, View,Image, Alert,TouchableOpacity,StatusBar } from 'react-native'
-import React, { useState } from 'react'
-import *as imagepicker from 'expo-image-picker';
-import { Link, Stack } from 'expo-router'
-
+import {ImageBackground,ScrollView, StyleSheet, Text, View, Alert, TouchableOpacity, StatusBar, TextInput,} from 'react-native';
+import * as Location from "expo-location";
+import { Link, Stack, useRouter } from "expo-router";
+import { Picker } from "@react-native-picker/picker";
+import React, { useState } from "react";
+import axios from "axios";
 
 const Home = () => {
+  const router = useRouter();
 
-    const [SelectedImage,setSelectedImage] = useState("");
-    async function Pickimage()
-    {
-        const {status}=await imagepicker.requestMediaLibraryPermissionsAsync();
+  const [Name, setName] = useState("");
+  const [Email, setEmail] = useState("");
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [district, setDistrict] = useState("");
+  const [state, setState] = useState("");
 
-        if(status!='granted')
-        {
-            Alert.alert('allow permiison for Accsseing photos');
-        }
-        let result=await imagepicker.launchImageLibraryAsync({
-            mediaTypes:imagepicker.MediaTypeOptions.Images,
-            allowsEditing:true,
-            aspect:[4,3],
-            quality:1,
-        })
+  const handleGetCrops = async () => {
+    // if (!Name || !Email || !district || !state) {
+    //   Alert.alert("Missing Fields", "Please fill all fields.");
+    //   return;
+    // }
 
-        if(!result.canceled)
-            {
-                setSelectedImage(result.assets[0].uri);
-            }
-        
+    // if (!locationGranted) {
+    //   Alert.alert("Location Required", "Please allow location access.");
+    //   return;
+    // }
+
+    // const data = {
+    //   name: Name,
+    //   email: Email,
+    //   District: district,
+    //   state: state,
+    // };
+
+    // try {
+    //   // url/locationdata
+    //   const response = await axios.post("url/locationdata", data);
+
+    //   if (response.data.status === 200) {
+    //     Alert.alert("Success", "Data submitted successfully!");
+    //     router.push("/output");
+    //   } else {
+    //     Alert.alert("Error", "An error occurred. Please try again.");
+    //   }
+    // } catch (error) {
+    //   console.log("An error occurred", error);
+    //   Alert.alert("Network Error", "Unable to reach server.");
+    // }
+
+    //remove it after connecting backend
+    router.push("/output")
+  };
+
+  const requestLocationPermission = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Location access is required");
+      return;
     }
-     
+    setLocationGranted(true);
+    Alert.alert("Success", "Location permission granted");
+  };
+
   return (
     <>
-        <Stack.Screen options={{headerShown:false}}/>
-        <StatusBar  backgroundColor="#77bba2"/>
-        <ImageBackground source={require("@/assets/images/Appbg.png")}
-        style={styles.Background}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar backgroundColor="#77bba2" />
+      <ImageBackground
+        source={require("@/assets/images/Appbg.png")}
+        style={styles.Background}
+      >
         <ScrollView>
-            <View style={styles.container}>
-                <View style={styles.imageContainer}>
-                    {SelectedImage &&<Image source={{uri:SelectedImage}} style={styles.image} />}
-                </View>
-                <View style={styles.ButtonContainer} >
-                    <TouchableOpacity style={styles.Button} onPress={Pickimage}><Text style={styles.ButtonText}>UPLOAD PHOTO</Text></TouchableOpacity>
-                </View> 
-                <Link href="/output">oUTPUT PAGE</Link>
+          <View style={styles.container}>
+            <TextInput
+              value={Name}
+              onChangeText={setName}
+              placeholder="Enter your name"
+              style={styles.input}
+            />
+            <TextInput
+              value={Email}
+              onChangeText={setEmail}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              style={styles.input}
+            />
+
+            <View style={styles.pickerContainer}>
+              <Text style={styles.label}>Select District:</Text>
+              <Picker
+                selectedValue={district}
+                onValueChange={(value) => setDistrict(value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select District" value="" />
+                <Picker.Item label="Ariyalur" value="Ariyalur" />
+                <Picker.Item label="Chengalpattu" value="Chengalpattu" />
+                <Picker.Item label="Chennai" value="Chennai" />
+                <Picker.Item label="Coimbatore" value="Coimbatore" />
+                <Picker.Item label="Cuddalore" value="Cuddalore" />
+                <Picker.Item label="Dharmapuri" value="Dharmapuri" />
+                <Picker.Item label="Dindigul" value="Dindigul" />
+                <Picker.Item label="Erode" value="Erode" />
+                <Picker.Item label="Kallakurichi" value="Kallakurichi" />
+                <Picker.Item label="Kancheepuram" value="Kancheepuram" />
+                <Picker.Item label="Karur" value="Karur" />
+                <Picker.Item label="Krishnagiri" value="Krishnagiri" />
+                <Picker.Item label="Madurai" value="Madurai" />
+                <Picker.Item label="Mayiladuthurai" value="Mayiladuthurai" />
+                <Picker.Item label="Nagapattinam" value="Nagapattinam" />
+                <Picker.Item label="Namakkal" value="Namakkal" />
+                <Picker.Item label="Nilgiris" value="Nilgiris" />
+                <Picker.Item label="Perambalur" value="Perambalur" />
+                <Picker.Item label="Pudukkottai" value="Pudukkottai" />
+                <Picker.Item label="Ramanathapuram" value="Ramanathapuram" />
+                <Picker.Item label="Ranipet" value="Ranipet" />
+                <Picker.Item label="Salem" value="Salem" />
+                <Picker.Item label="Sivaganga" value="Sivaganga" />
+                <Picker.Item label="Tenkasi" value="Tenkasi" />
+                <Picker.Item label="Thanjavur" value="Thanjavur" />
+                <Picker.Item label="Theni" value="Theni" />
+                <Picker.Item label="Thiruvallur" value="Thiruvallur" />
+                <Picker.Item label="Thiruvarur" value="Thiruvarur" />
+                <Picker.Item label="Thoothukudi" value="Thoothukudi" />
+                <Picker.Item label="Tiruchirappalli" value="Tiruchirappalli" />
+                <Picker.Item label="Tirunelveli" value="Tirunelveli" />
+                <Picker.Item label="Tirupathur" value="Tirupathur" />
+                <Picker.Item label="Tiruppur" value="Tiruppur" />
+                <Picker.Item label="Tiruvannamalai" value="Tiruvannamalai" />
+                <Picker.Item label="Vellore" value="Vellore" />
+                <Picker.Item label="Viluppuram" value="Viluppuram" />
+                <Picker.Item label="Virudhunagar" value="Virudhunagar" />
+              </Picker>
             </View>
-            
+
+            <View style={styles.pickerContainer}>
+              <Text style={styles.label}>Select State:</Text>
+              <Picker
+                selectedValue={state}
+                onValueChange={(value) => setState(value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select State" value="" />
+                <Picker.Item label="Tamil Nadu" value="Tamil Nadu" />
+              </Picker>
+            </View>
+
+            <View style={styles.ButtonContainer}>
+              <TouchableOpacity
+                style={styles.Button}
+                onPress={requestLocationPermission}
+              >
+                <Text style={styles.ButtonText}>ALLOW LOCATION</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.ButtonContainer}>
+              <TouchableOpacity
+                style={styles.GetCropsButton}
+                onPress={handleGetCrops}
+              >
+                <Text style={styles.ButtonText1}>Get Crops</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </ScrollView>
-
-        </ImageBackground>
-
+      </ImageBackground>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
 
 const styles = StyleSheet.create({
-    Background: {
-        height: "100%",
-        width: "100%",
-        resizeMode: "cover",
-      },
-      image: {
-        width: 200,
-        height: 200,
-        marginTop: 20,
-        borderRadius: 10,
-        flex:1,
-        alignItems:"center",
-        justifyContent:"center",
-      },
-      container:{
-        margin:10,
-        flex:1,
-        gap:40,
-      },
-      imageContainer:{
-        flex:1,
-        alignItems:"center",
-        justifyContent:"center",
-      },
-      ButtonContainer:{
-          marginTop:70,
-          fontSize:24,
-          padding:20,
-          alignItems:"center",
-          justifyContent:"center",
-      },
-      Button:{
-        borderWidth:1,
-        padding :20,
-        paddingLeft:70,
-        paddingRight:70,
-        marginLeft:12,
-        backgroundColor:"black",
-        borderRadius:30,
-      },
-      ButtonText:{
-        fontSize:15,
-        color:"white",
-        fontWeight:"bold",
-
-      }
-})
+  Background: {
+    height: "100%",
+    width: "100%",
+    resizeMode: "cover",
+  },
+  container: {
+    margin: 20,
+    flex: 1,
+    gap: 15,
+    marginTop: 260,
+  },
+  input: {
+    borderRadius: 10,
+    padding: 18,
+    backgroundColor: "#77bba2",
+  },
+  pickerContainer: {
+    backgroundColor: "#77bba2",
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+  },
+  label: {
+    fontSize: 16,
+    paddingLeft: 10,
+    paddingTop: 5,
+    fontWeight: "bold",
+  },
+  ButtonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  Button: {
+    padding: 16,
+    paddingLeft: 70,
+    paddingRight: 70,
+    backgroundColor: "#77bba2",
+    borderRadius: 7,
+  },
+  GetCropsButton: {
+    borderWidth: 1,
+    padding: 16,
+    paddingLeft: 70,
+    paddingRight: 70,
+    backgroundColor: "black", 
+    borderRadius: 7,
+  },
+  ButtonText: {
+    fontSize: 15,
+    color: "white",
+    fontWeight: "bold",
+  },
+  ButtonText1: {
+    fontSize: 17,
+    color: "white",
+    fontWeight: "bold",
+  },
+});

@@ -1,59 +1,109 @@
-import { ImageBackground, ScrollView, StyleSheet, Text, View,TextInput,Button,StatusBar } from 'react-native'
-import {Stack,Link,useRouter} from 'expo-router'
-import React from 'react'
-import { navigate } from 'expo-router/build/global-state/routing'
+import { ImageBackground, ScrollView, StyleSheet, Text, View, TextInput, Button, StatusBar } from 'react-native';
+import { Stack, Link, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const Login = () => {
-  const router=useRouter();
-  function nav(){
-       router.push('/Home')
-  }
-  
+  const [Name, setName] = useState('');
+  const [Password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  const router = useRouter();
+
+  const handleLogin = async () => {
+    const data = {
+      name: Name,
+      password: Password,
+    };
+
+    // URL/LOGIN
+    try {
+
+      // uncomment while connecting backend .... for local i commented it 
+
+      // URL/LOGIN
+      //const response = await axios.post("URL/login", data); 
+
+      if(Name==="test" && Password==="123")
+      {
+        router.push("/Home");
+      }
+
+      // remove the above two lines after connecting used for testing purpose
+
+      if (response.data.status === 200) {
+        router.push("/Home");
+      } else {
+        setMessage("Login failed");
+      }
+    } catch (error) {
+      console.log("Login failed:", error);
+      setMessage("Failed, please try again");
+    }
+  };
+
   return (
-
     <>
-    <Stack.Screen options={{headerShown:false}} />
-    <StatusBar  backgroundColor="#77bba2"/>
-    <ImageBackground
-            source={require("@/assets/images/Appbg.png")}
-              style={styles.Background}
-            
-          >
-    <ScrollView>
+      <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar backgroundColor="#77bba2" />
+      <ImageBackground
+        source={require("@/assets/images/Appbg.png")}
+        style={styles.Background}
+      >
+        <ScrollView>
+          <View style={styles.conatiner}>
+            {/* Logo */}
+            <View>
+              <Text>Logo</Text>
+            </View>
 
-    {/*Logo design is here */ }
-    <View  style={styles.conatiner} >
-      <View>
-        <Text>Logo</Text>
-      </View>
+            {/* Login form */}
+            <View style={styles.Login}>
+              <Text style={{ fontSize: 40, textAlign: "center" }}>Login</Text>
 
-      {/* login page work in here  */}
-      <View style={styles.Login}>
-        <Text style={{fontSize:40,textAlign:"center"}}>Login</Text>
-        <TextInput placeholder=' Enter Your UserName'  style={styles.input}  /> 
-        <TextInput placeholder='Enter Your Password' style={styles.input}/>
-        <Button color={"black"} title="Login" onPress={nav}/>
+              <TextInput
+                value={Name}
+                onChangeText={(text) => setName(text)}
+                placeholder="Enter Your UserName"
+                style={styles.input}
+              />
 
-        {/*Fogot passwrod link is here*/}
-       
-        {/* Singup page Navigation lonk is here  */}
-        <View style={{flex:1,justifyContent:"center",gap:10}}>
-          <Link href="pass." style={{color:"blue",textDecorationLine:"underline",fontSize:17,textAlign:"center"}}><Text>Forgot Password?</Text></Link>
-          <Text style={{ fontSize:17}} >New User? </Text>
-           <Link href="/">
-              <Text style={{ color: "blue", textDecorationLine: "underline",fontSize:17, }}>SignUp</Text>
-            </Link>
-        </View>
+              <TextInput
+                value={Password}
+                onChangeText={(text) => setPassword(text)}
+                placeholder="Enter Your Password"
+                secureTextEntry
+                style={styles.input}
+              />
 
-      </View>
-    </View>
-    </ScrollView>
-    </ImageBackground>
+              <Button color="black" title="Login" onPress={handleLogin} />
+
+              {/* Display message */}
+              {message !== '' && (
+                <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>{message}</Text>
+              )}
+
+              {/* Forgot Password */}
+              <Link href=" ">
+                <Text style={styles.linkText}>Forgot Password?</Text>
+              </Link>
+
+              {/* New User and SignUp in one line */}
+              <View style={styles.row}>
+                <Text style={styles.text}>New User? </Text>
+                <Link href="/">
+                  <Text style={styles.signupLink}>SignUp</Text>
+                </Link>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </ImageBackground>
     </>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
 
 const styles = StyleSheet.create({
   Background: {
@@ -61,24 +111,40 @@ const styles = StyleSheet.create({
     width: "100%",
     resizeMode: "cover",
   },
-  conatiner:{
-    flex:1,
-    flexDirection:"column",
-    gap:220,
-    margin:20,
+  conatiner: {
+    flex: 1,
+    flexDirection: "column",
+    gap: 220,
+    margin: 20,
   },
-  Login:{
-    flex:1,
-    flexDirection:"column",
-    gap:24,
-    
+  Login: {
+    flex: 1,
+    flexDirection: "column",
+    gap: 24,
   },
-  input:{
-    borderRadius:10,
-    padding:16,
-    backgroundColor:"#77bba2",
-
-
-  }
-
-})
+  input: {
+    borderRadius: 10,
+    padding: 16,
+    backgroundColor: "#77bba2",
+  },
+  linkText: {
+    color: "blue",
+    textDecorationLine: "underline",
+    fontSize: 17,
+    textAlign: "center",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+  },
+  text: {
+    fontSize: 17,
+  },
+  signupLink: {
+    color: "blue",
+    fontSize: 17,
+    textDecorationLine: "underline",
+  },
+});
