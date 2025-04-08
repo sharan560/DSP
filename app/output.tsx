@@ -1,199 +1,83 @@
-import { ImageBackground, StyleSheet, Text, View, Animated, Easing } from 'react-native';
-import React, { useEffect, useState, useRef } from 'react';
-import { Stack } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, FlatList } from 'react-native';
 
 const Output = () => {
   const [data, setData] = useState({
-    temp: '',
-    water: '',
-    ph: '',
-    efficiency: '',
-    suggestion: '',
+    rice_varieties: [],
+    top_crops: []
   });
 
-  const [loading, setLoading] = useState(true);
-  const spinValue = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
-    Animated.loop(
-      Animated.timing(spinValue, {
-        toValue: 1,
-        duration: 1000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
-
-  useEffect(() => {
-    const fetchValues = async () => {
+    const fetchData = async () => {
       try {
-        //fetch value 
-        const response = await fetch('url/data');
+        const response = await fetch('http://192.168.30.237/predict-crop/');
         const result = await response.json();
         setData(result);
       } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching crop data:', error);
       }
     };
 
-    fetchValues();
+    fetchData();
   }, []);
 
-  const spin = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  if (loading) {
-    return (
-      <View style={styles.loaderContainer}>
-        <Animated.View style={[styles.loader, { transform: [{ rotate: spin }] }]} />
-        <Text style={styles.loadingText}>Fetching Data...</Text>
-      </View>
-    );
-  }
-
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <ImageBackground
-        source={require('@/assets/images/Appbg1.png')}
-        style={styles.Background}
-      >
-        <View style={styles.mainContainer}>
-          <View style={styles.row}>
-            <View style={styles.cardContainer}>
-              <View style={styles.card}>
-                <Text style={styles.cardText}>{data.temp}</Text>
-              </View>
-              <Text style={styles.label}>temp</Text>
-            </View>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>🌾 Recommended Rice Varieties</Text>
+      {(data.rice_varieties || []).map((variety, index) => (
+        <Text key={index} style={styles.variety}>{variety}</Text>
+      ))}
 
-            <View style={styles.cardContainer}>
-              <View style={styles.card}>
-                <Text style={styles.cardText}>{data.water}</Text>
-              </View>
-              <Text style={styles.label}>water</Text>
-            </View>
+      <Text style={styles.title}>🥗 Top 5 Crop Suggestions</Text>
+      <FlatList
+        data={data.top_crops || []}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.cropRow}>
+            <Text style={styles.cropName}>{item[0]}</Text>
+            <Text style={styles.cropScore}>{(item[1]).toFixed(2)}%</Text>
           </View>
-
-          <View style={styles.row}>
-            <View style={styles.cardContainer}>
-              <View style={styles.card}>
-                <Text style={styles.cardText}>{data.ph}</Text>
-              </View>
-              <Text style={styles.label}>ph</Text>
-            </View>
-
-            <View style={styles.cardContainer}>
-              <View style={styles.card}>
-                <Text style={styles.cardText}>{data.efficiency}</Text>
-              </View>
-              <Text style={styles.label}>efficiency</Text>
-            </View>
-          </View>
-
-          <View style={styles.suggestionBox}>
-            <Text style={styles.suggestionContent}>{data.suggestion}</Text>
-          </View>
-          <Text style={styles.suggestionText}>Suggestions</Text>
-        </View>
-      </ImageBackground>
-    </>
+        )}
+      />
+    </SafeAreaView>
   );
 };
 
 export default Output;
 
 const styles = StyleSheet.create({
-  Background: {
+  container: {
     flex: 1,
-    resizeMode: 'cover',
+    padding: 20,
+    backgroundColor: '#f4f4f4'
   },
-  mainContainer: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingTop: 80,
-    paddingHorizontal: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '100%',
-    marginBottom: 30,
-  },
-  cardContainer: {
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: 'white',
-    height: 160,
-    width: 160,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-    marginBottom: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardText: {
-    color: 'black',
-    fontSize: 48,
+  title: {
+    fontSize: 22,
     fontWeight: 'bold',
+    marginVertical: 10,
+    color: '#333'
   },
-  label: {
+  variety: {
     fontSize: 18,
-    fontWeight: '500',
-    color: '#333',
-    textTransform: 'lowercase',
+    color: '#007f5f',
+    marginBottom: 5
   },
-  suggestionBox: {
-    height: 180,
-    width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginTop: 5,
-    marginBottom: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  suggestionText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-  },
-  suggestionContent: {
-    fontSize: 16,
-    color: '#000',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  cropRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     backgroundColor: '#fff',
+    padding: 15,
+    marginVertical: 5,
+    borderRadius: 10,
+    elevation: 2
   },
-  loader: {
-    width: 60,
-    height: 60,
-    borderWidth: 5,
-    borderColor: '#ccc',
-    borderTopColor: '#333',
-    borderRadius: 30,
-    marginBottom: 20,
+  cropName: {
+    fontSize: 18,
+    color: '#333'
   },
-  loadingText: {
-    fontSize: 16,
-    color: '#555',
-  },
+  cropScore: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555'
+  }
 });

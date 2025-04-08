@@ -12,32 +12,21 @@ const Login = () => {
 
   const handleLogin = async () => {
     const data = {
-      name: Name,
+      username: Name,
       password: Password,
     };
 
-    // URL/LOGIN
     try {
-
-      // uncomment while connecting backend .... for local i commented it 
-
-      // URL/LOGIN
-      //const response = await axios.post("URL/login", data); 
-
-      if(Name==="test" && Password==="123")
-      {
-        router.push("/Home");
-      }
-
-      // remove the above two lines after connecting used for testing purpose
-
-      if (response.data.status === 200) {
+      // Ensure the query parameter action=login is present in the URL
+      const response = await axios.post("http://192.168.30.237/user/?action=login", data);
+      
+      if (response.data.status === 200 || response.data.message === "Login successful!") {
         router.push("/Home");
       } else {
         setMessage("Login failed");
       }
     } catch (error) {
-      console.log("Login failed:", error);
+      console.log("Login failed:", error.response?.data || error);
       setMessage("Failed, please try again");
     }
   };
@@ -51,7 +40,7 @@ const Login = () => {
         style={styles.Background}
       >
         <ScrollView>
-          <View style={styles.conatiner}>
+          <View style={styles.container}>
             {/* Logo */}
             <View>
               <Text>Logo</Text>
@@ -111,7 +100,7 @@ const styles = StyleSheet.create({
     width: "100%",
     resizeMode: "cover",
   },
-  conatiner: {
+  container: {
     flex: 1,
     flexDirection: "column",
     gap: 220,

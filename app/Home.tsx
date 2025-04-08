@@ -1,64 +1,80 @@
-import {ImageBackground,ScrollView, StyleSheet, Text, View, Alert, TouchableOpacity, StatusBar, TextInput,} from 'react-native';
-import * as Location from "expo-location";
-import { Link, Stack, useRouter } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
-import React, { useState } from "react";
-import axios from "axios";
+import {ImageBackground, ScrollView, StyleSheet, Text, View, Alert, TouchableOpacity, StatusBar, TextInput,} from 'react-native';
+import * as Location from 'expo-location';
+import { Link, Stack, useRouter } from 'expo-router';
+import { Picker } from '@react-native-picker/picker';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const Home = () => {
   const router = useRouter();
 
-  const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
+  const [Name, setName] = useState('');
   const [locationGranted, setLocationGranted] = useState(false);
-  const [district, setDistrict] = useState("");
-  const [state, setState] = useState("");
+  const [district, setDistrict] = useState('');
+  const [state, setState] = useState('');
+
+  const [ipAddress, setIpAddress] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   const handleGetCrops = async () => {
-    // if (!Name || !Email || !district || !state) {
-    //   Alert.alert("Missing Fields", "Please fill all fields.");
-    //   return;
-    // }
+    if (!Name || !district || !state) {
+      Alert.alert('Missing Fields', 'Please fill all fields.');
+      return;
+    }
 
-    // if (!locationGranted) {
-    //   Alert.alert("Location Required", "Please allow location access.");
-    //   return;
-    // }
+    if (!locationGranted) {
+      Alert.alert('Location Required', 'Please allow location access.');
+      return;
+    }
 
-    // const data = {
-    //   name: Name,
-    //   email: Email,
-    //   District: district,
-    //   state: state,
-    // };
+    try {
+      const ipResponse = await fetch('https://ipinfo.io/json?token=cf975591a02f51');
+      const ipData = await ipResponse.json();
+      const ip = ipData.ip;
+      setIpAddress(ip);
 
-    // try {
-    //   // url/locationdata
-    //   const response = await axios.post("url/locationdata", data);
+      const location = await Location.getCurrentPositionAsync({});
+      const currentLatitude = location.coords.latitude;
+      const currentLongitude = location.coords.longitude;
+      setLatitude(currentLatitude);
+      setLongitude(currentLongitude);
 
-    //   if (response.data.status === 200) {
-    //     Alert.alert("Success", "Data submitted successfully!");
-    //     router.push("/output");
-    //   } else {
-    //     Alert.alert("Error", "An error occurred. Please try again.");
-    //   }
-    // } catch (error) {
-    //   console.log("An error occurred", error);
-    //   Alert.alert("Network Error", "Unable to reach server.");
-    // }
+      const data = {
+        District: district,
+        state: state,
+        ip: ip,
+        latitude: currentLatitude,
+        longitude: currentLongitude,
+      };
 
-    //remove it after connecting backend
-    router.push("/output")
+      const response = await axios.post("http://192.168.30.237/submit-location/", data);
+
+      // 🔽 Printing and alerting status and message
+      console.log("Backend Response:", response.data);
+
+      const { status, message } = response.data;
+
+      if (message==="Coordinates received and analyzed successfully.") {
+        Alert.alert('Success', message || 'Data submitted successfully!');
+        router.push('/output');
+      } else {
+        Alert.alert('Error', message || 'An error occurred. Please try again.');
+      }
+    } catch (error) {
+      console.log('An error occurred', error);
+      Alert.alert('Network Error', 'Unable to reach server.');
+    }
   };
 
   const requestLocationPermission = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Location access is required");
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Location access is required');
       return;
     }
     setLocationGranted(true);
-    Alert.alert("Success", "Location permission granted");
+    Alert.alert('Success', 'Location permission granted');
   };
 
   return (
@@ -75,13 +91,6 @@ const Home = () => {
               value={Name}
               onChangeText={setName}
               placeholder="Enter your name"
-              style={styles.input}
-            />
-            <TextInput
-              value={Email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              keyboardType="email-address"
               style={styles.input}
             />
 
@@ -173,9 +182,9 @@ export default Home;
 
 const styles = StyleSheet.create({
   Background: {
-    height: "100%",
-    width: "100%",
-    resizeMode: "cover",
+    height: '100%',
+    width: '100%',
+    resizeMode: 'cover',
   },
   container: {
     margin: 20,
@@ -186,32 +195,32 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: 10,
     padding: 18,
-    backgroundColor: "#77bba2",
+    backgroundColor: '#77bba2',
   },
   pickerContainer: {
-    backgroundColor: "#77bba2",
+    backgroundColor: '#77bba2',
     borderRadius: 8,
     marginVertical: 10,
   },
   picker: {
     height: 50,
-    width: "100%",
+    width: '100%',
   },
   label: {
     fontSize: 16,
     paddingLeft: 10,
     paddingTop: 5,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   ButtonContainer: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   Button: {
     padding: 16,
     paddingLeft: 70,
     paddingRight: 70,
-    backgroundColor: "#77bba2",
+    backgroundColor: '#77bba2',
     borderRadius: 7,
   },
   GetCropsButton: {
@@ -219,17 +228,17 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingLeft: 70,
     paddingRight: 70,
-    backgroundColor: "black", 
+    backgroundColor: 'black',
     borderRadius: 7,
   },
   ButtonText: {
     fontSize: 15,
-    color: "white",
-    fontWeight: "bold",
+    color: 'white',
+    fontWeight: 'bold',
   },
   ButtonText1: {
     fontSize: 17,
-    color: "white",
-    fontWeight: "bold",
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
