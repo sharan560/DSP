@@ -15,7 +15,6 @@ const Login = () => {
       username: Name,
       password: Password,
     };
-    router.push("/Home");
 
     try {
       // Ensure the query parameter action=login is present in the URL
