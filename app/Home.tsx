@@ -1,4 +1,4 @@
-import {ImageBackground, ScrollView, StyleSheet, Text, View, Alert, TouchableOpacity, StatusBar, TextInput,} from 'react-native';
+import {ImageBackground,Image, ScrollView, StyleSheet, Text, View, Alert, TouchableOpacity, StatusBar, TextInput,} from 'react-native';
 import * as Location from 'expo-location';
 import { Link, Stack, useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
@@ -48,7 +48,7 @@ const Home = () => {
         longitude: currentLongitude,
       };
 
-      const response = await axios.post("http://192.168.30.237/submit-location/", data);
+      const response = await axios.post("http://192.168.178.237/submit-location/", data);
 
       // 🔽 Printing and alerting status and message
       console.log("Backend Response:", response.data);
@@ -85,6 +85,9 @@ const Home = () => {
         source={require("@/assets/images/Appbg.png")}
         style={styles.Background}
       >
+        <View style={styles.logoContainer}>
+                               <Image source={require('../assets/images/logo.png')} style={styles.logo} />
+                      </View>
         <ScrollView>
           <View style={styles.container}>
             <TextInput
@@ -186,16 +189,27 @@ const styles = StyleSheet.create({
     width: '100%',
     resizeMode: 'cover',
   },
+  logo:{
+    width:220,
+    height:220,
+   
+  },
+  logoContainer:{
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:10
+  },
   container: {
     margin: 20,
     flex: 1,
     gap: 15,
-    marginTop: 260,
+    marginTop: 80,
   },
   input: {
     borderRadius: 10,
     padding: 18,
     backgroundColor: '#77bba2',
+    color:'black'
   },
   pickerContainer: {
     backgroundColor: '#77bba2',

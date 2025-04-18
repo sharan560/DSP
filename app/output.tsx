@@ -1,6 +1,8 @@
+import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, FlatList } from 'react-native';
-
+import { StatusBar } from 'react-native';
+import { ImageBackground } from 'react-native';
 const Output = () => {
   const [data, setData] = useState({
     rice_varieties: [],
@@ -10,7 +12,7 @@ const Output = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://192.168.30.237/predict-crop/');
+        const response = await fetch('http://192.168.178.237/predict-crop/');
         const result = await response.json();
         setData(result);
       } catch (error) {
@@ -22,7 +24,14 @@ const Output = () => {
   }, []);
 
   return (
+    
     <SafeAreaView style={styles.container}>
+    <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar backgroundColor="#77bba2" />
+      <ImageBackground
+              source={require("@/assets/images/Appbg1.png")}
+              style={styles.Background}
+            >
       <Text style={styles.title}>🌾 Recommended Rice Varieties</Text>
       {(data.rice_varieties || []).map((variety, index) => (
         <Text key={index} style={styles.variety}>{variety}</Text>
@@ -39,6 +48,7 @@ const Output = () => {
           </View>
         )}
       />
+      </ImageBackground>
     </SafeAreaView>
   );
 };
@@ -50,6 +60,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f4f4f4'
+  },
+  Background: {
+    height: '100%',
+    width: '100%',
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 22,

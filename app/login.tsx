@@ -1,4 +1,4 @@
-import { ImageBackground, ScrollView, StyleSheet, Text, View, TextInput, Button, StatusBar } from 'react-native';
+import { ImageBackground,Image, ScrollView, StyleSheet, Text, View, TextInput, Button, StatusBar } from 'react-native';
 import { Stack, Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -15,10 +15,11 @@ const Login = () => {
       username: Name,
       password: Password,
     };
+    router.push("/Home");
 
     try {
       // Ensure the query parameter action=login is present in the URL
-      const response = await axios.post("http://192.168.30.237/user/?action=login", data);
+      const response = await axios.post("http://192.168.178.237/user/?action=login", data);
       
       if (response.data.status === 200 || response.data.message === "Login successful!") {
         router.push("/Home");
@@ -41,12 +42,10 @@ const Login = () => {
       >
         <ScrollView>
           <View style={styles.container}>
-            {/* Logo */}
-            <View>
-              <Text>Logo</Text>
-            </View>
+           <View style={styles.logoContainer}>
+                       <Image source={require('../assets/images/logo.png')} style={styles.logo} />
+              </View>
 
-            {/* Login form */}
             <View style={styles.Login}>
               <Text style={{ fontSize: 40, textAlign: "center" }}>Login</Text>
 
@@ -72,7 +71,7 @@ const Login = () => {
                 <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>{message}</Text>
               )}
 
-              {/* Forgot Password */}
+      
               <Link href=" ">
                 <Text style={styles.linkText}>Forgot Password?</Text>
               </Link>
@@ -100,10 +99,20 @@ const styles = StyleSheet.create({
     width: "100%",
     resizeMode: "cover",
   },
+  logo:{
+    width:220,
+    height:220,
+   
+  },
+  logoContainer:{
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:-10,
+  },
   container: {
     flex: 1,
     flexDirection: "column",
-    gap: 220,
+    gap: 70,
     margin: 20,
   },
   Login: {
